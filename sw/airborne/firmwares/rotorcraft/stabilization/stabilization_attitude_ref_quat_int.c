@@ -29,6 +29,7 @@
 
 #include "generated/airframe.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_transformations.h"
 
 #include "stabilization_attitude_ref_int.h"
 
@@ -103,11 +104,10 @@ void stabilization_attitude_ref_enter(void)
 {
   reset_psi_ref_from_body();
 
-  /* convert reference attitude with REF_ANGLE_FRAC to eulers with normal INT32_ANGLE_FRAC */
-  struct Int32Eulers ref_eul;
-  INT32_EULERS_RSHIFT(ref_eul, stab_att_ref_euler, (REF_ANGLE_FRAC - INT32_ANGLE_FRAC));
-  INT32_QUAT_OF_EULERS(stab_att_ref_quat, ref_eul);
-  INT32_QUAT_WRAP_SHORTEST(stab_att_ref_quat);
+  /* convert reference attitude command with REF_ANGLE_FRAC to eulers with normal INT32_ANGLE_FRAC */
+  struct Int32Eulers ref_cmd;
+  INT32_EULERS_RSHIFT(ref_cmd, stab_att_ref_euler, (REF_ANGLE_FRAC - INT32_ANGLE_FRAC));
+  quat_from_rpy_cmd_i(&stab_att_ref_quat, &ref_cmd);
 
   /* set reference rate and acceleration to zero */
   memset(&stab_att_ref_accel, 0, sizeof(struct Int32Rates));

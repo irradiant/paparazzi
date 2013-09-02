@@ -29,6 +29,7 @@
 
 #include "generated/airframe.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_transformations.h"
 #include "state.h"
 
 #include "stabilization_attitude_ref_float.h"
@@ -66,13 +67,6 @@ static inline void reset_psi_ref_from_body(void) {
   stab_att_ref_accel.r = 0;
 }
 
-static inline void update_ref_quat_from_eulers(void) {
-  struct FloatRMat ref_rmat;
-  FLOAT_RMAT_OF_EULERS(ref_rmat, stab_att_ref_euler);
-  FLOAT_QUAT_OF_RMAT(stab_att_ref_quat, ref_rmat);
-  FLOAT_QUAT_WRAP_SHORTEST(stab_att_ref_quat);
-}
-
 void stabilization_attitude_ref_init(void) {
 
   FLOAT_EULERS_ZERO(stab_att_sp_euler);
@@ -95,7 +89,7 @@ void stabilization_attitude_ref_schedule(uint8_t idx) {
 
 void stabilization_attitude_ref_enter(void) {
   reset_psi_ref_from_body();
-  update_ref_quat_from_eulers();
+  quat_from_rpy_cmd_f(&stab_att_ref_quat, &stab_att_ref_euler);
 }
 
 /*
